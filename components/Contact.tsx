@@ -54,7 +54,7 @@ export default function Contact() {
 
                 <div className="mt-24 flex justify-center gap-8 md:gap-12">
                     {[
-                        { name: 'LinkedIn', icon: FaLinkedin, href: 'https://linkedin.com/in/tushar-mistari' },
+                        { name: 'LinkedIn', icon: FaLinkedin, href: 'https://www.linkedin.com/in/tushar-mistari-1a363a340' },
                         { name: 'GitHub', icon: FaGithub, href: 'https://github.com/tusharmistari74' },
                         { name: 'Email', icon: FaEnvelope, href: 'mailto:tusharmistari782@gmail.com' },
                     ].map((social, index) => (

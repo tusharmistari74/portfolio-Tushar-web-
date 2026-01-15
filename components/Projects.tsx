@@ -74,7 +74,7 @@ export default function Projects() {
                     <div className="flex flex-wrap justify-center gap-6 text-sm">
                         <a href="mailto:tusharmistari782@gmail.com" className="hover:text-purple-400 transition-colors">tusharmistari782@gmail.com</a>
                         <a href="tel:+917768942390" className="hover:text-purple-400 transition-colors">+91-7768942390</a>
-                        <a href="https://linkedin.com/in/tushar-mistari" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">LinkedIn</a>
+                        <a href="https://www.linkedin.com/in/tushar-mistari-1a363a340" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">LinkedIn</a>
                         <a href="https://github.com/tusharmistari74" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">GitHub</a>
                     </div>
                 </div>
