@@ -45,7 +45,7 @@ export default function Contact() {
                         href="https://wa.me/917768942390"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-200 transition-colors shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]"
+                        className="inline-flex items-center gap-3 bg-[#25D366] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#20bd5a] transition-colors shadow-[0_0_40px_-10px_rgba(37,211,102,0.5)]"
                     >
                         <FaWhatsapp className="text-xl" />
                         Let's Collaborate
