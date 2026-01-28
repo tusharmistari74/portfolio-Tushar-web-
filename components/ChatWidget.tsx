@@ -17,7 +17,8 @@ import {
     onSnapshot,
     serverTimestamp,
     doc,
-    setDoc
+    setDoc,
+    getDoc
 } from "firebase/firestore";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { db, auth } from "@/lib/firebase";

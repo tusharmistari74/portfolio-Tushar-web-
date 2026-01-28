@@ -8,13 +8,19 @@ import {
     onSnapshot,
     addDoc,
     serverTimestamp,
-    doc,
     updateDoc,
-    deleteDoc
+    deleteDoc,
+    doc,
+    setDoc
 } from "firebase/firestore";
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from "firebase/auth";
 import { db, auth } from "@/lib/firebase";
-import { FaPaperPlane, FaUserShield, FaSignOutAlt, FaCommentDots, FaTrash } from "react-icons/fa";
+import { FaPaperPlane, FaUserShield, FaSignOutAlt, FaCommentDots, FaTrash, FaCog } from "react-icons/fa";
+
+interface ChatConfig {
+    isOnline: boolean;
+    autoReplyMessage: string;
+}
 
 interface ChatSession {
     sessionId: string;
@@ -31,6 +37,7 @@ interface Message {
     text: string;
     sender: "user" | "admin";
     createdAt: any;
+    read?: boolean;
 }
 
 export default function AdminChat() {
@@ -42,7 +49,32 @@ export default function AdminChat() {
     const [selectedChat, setSelectedChat] = useState<ChatSession | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [reply, setReply] = useState("");
+    const [showSettings, setShowSettings] = useState(false);
+    const [config, setConfig] = useState<ChatConfig>({
+        isOnline: true,
+        autoReplyMessage: "Hi! I'm currently offline, but I've received your message. I'll get back to you as soon as I'm back!"
+    });
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Fetch Config
+    useEffect(() => {
+        const unsubscribe = onSnapshot(doc(db, "config", "chat"), (doc) => {
+            if (doc.exists()) {
+                setConfig(doc.data() as ChatConfig);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
+
+    const toggleOnlineStatus = async () => {
+        await setDoc(doc(db, "config", "chat"), {
+            isOnline: !config.isOnline
+        }, { merge: true });
+    };
+
+    const updateConfig = async (newConfig: Partial<ChatConfig>) => {
+        await setDoc(doc(db, "config", "chat"), newConfig, { merge: true });
+    };
 
     // Auth State Listener
     useEffect(() => {
@@ -100,8 +132,38 @@ export default function AdminChat() {
             await updateDoc(doc(db, "active_chats", chat.sessionId), {
                 unread: false
             });
+
+            // Allow this to fail silently if permission denied (though admin should have permission)
+            // We also want to mark individual messages as read? 
+            // For now, let's just assume the UI shows "Read" based on some other logic or ignore strict per-message read status in Admin 
+            // because iterating all docs to update them is expensive.
+            // BETTER APPROACH: Store `lastReadByAdmin` timestamp. 
+            // Messages before that timestamp are "read". 
+
+            // Simple approach for this MVP:
+            // Just keeping the badge update is enough for Admin view.
+            // For the USER to see "Read", we need to update the messages or a status.
+
+            // Let's implement the `read` flag on messages for the User's sake.
+            // fetch unread messages
+            // This needs to be done carefully to not spam writes. 
+            // Let's just update the top 20 latest messages from 'user' that are not read.
         }
     };
+
+    // Add effect to mark messages as read when viewing
+    useEffect(() => {
+        if (!selectedChat || !messages.length) return;
+
+        const unreadUserMessages = messages.filter(m => m.sender === 'user' && !m.read);
+        if (unreadUserMessages.length > 0) {
+            unreadUserMessages.forEach(async (msg) => {
+                await updateDoc(doc(db, "chats", selectedChat.sessionId, "messages", msg.id), {
+                    read: true
+                });
+            });
+        }
+    }, [messages, selectedChat]);
 
     const deleteChat = async (e: React.MouseEvent, sessionId: string) => {
         e.stopPropagation();
@@ -221,14 +283,60 @@ export default function AdminChat() {
             {/* Sidebar - Chat List */}
             <div className="w-80 border-r border-white/10 flex flex-col">
                 <div className="p-4 border-b border-white/10 flex justify-between items-center bg-[#121212]">
-                    <h2 className="font-bold flex items-center gap-2">
-                        <FaUserShield className="text-purple-500" />
-                        Admin Panel
-                    </h2>
-                    <button onClick={handleLogout} className="text-gray-400 hover:text-white text-sm" title="Log Out">
-                        <FaSignOutAlt />
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <h2 className="font-bold flex items-center gap-2">
+                            <FaUserShield className="text-purple-500" />
+                            Admin Panel
+                        </h2>
+                        {/* Status Toggle */}
+                        <div
+                            onClick={toggleOnlineStatus}
+                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${config.isOnline ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                                }`}
+                        >
+                            <span className={`w-2 h-2 rounded-full ${config.isOnline ? "bg-green-500" : "bg-red-500"}`}></span>
+                            {config.isOnline ? "Online" : "Offline"}
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => setShowSettings(!showSettings)} className="text-gray-400 hover:text-white text-sm p-2">
+                            <FaCog />
+                        </button>
+                        <button onClick={handleLogout} className="text-gray-400 hover:text-white text-sm p-2" title="Log Out">
+                            <FaSignOutAlt />
+                        </button>
+                    </div>
                 </div>
+
+                {/* Settings Panel */}
+                {showSettings && (
+                    <div className="p-4 border-b border-white/10 bg-[#1a1a1a] text-sm animate-in slide-in-from-top-2">
+                        <h3 className="font-bold mb-3 text-gray-300">Auto-Reply Configuration</h3>
+                        <div className="space-y-3">
+                            <div>
+                                <label className="block text-xs text-gray-500 mb-1">Status</label>
+                                <button
+                                    onClick={toggleOnlineStatus}
+                                    className={`w-full py-2 rounded-lg font-medium transition-colors ${config.isOnline
+                                        ? "bg-green-600 hover:bg-green-700 text-white"
+                                        : "bg-red-600 hover:bg-red-700 text-white"
+                                        }`}
+                                >
+                                    Currently: {config.isOnline ? "Online (Replies Disabled)" : "Offline (Replies Enabled)"}
+                                </button>
+                            </div>
+                            <div>
+                                <label className="block text-xs text-gray-500 mb-1">Auto-Reply Message</label>
+                                <textarea
+                                    value={config.autoReplyMessage}
+                                    onChange={(e) => updateConfig({ autoReplyMessage: e.target.value })}
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-gray-300 focus:outline-none focus:border-purple-500 min-h-[80px]"
+                                    placeholder="Enter message to send when offline..."
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="flex-1 overflow-y-auto">
                     {activeChats.length === 0 ? (
