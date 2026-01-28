@@ -290,9 +290,9 @@ export default function AdminChat() {
                                             }`}
                                     >
                                         {msg.text}
-                                        <div className={`text-[10px] mt-1 ${msg.sender === "admin" ? "text-purple-200" : "text-gray-400"
+                                        <div className={`text-xs mt-1 opacity-70 ${msg.sender === "admin" ? "text-purple-100" : "text-gray-400"
                                             }`}>
-                                            {msg.createdAt?.seconds ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                                            {msg.createdAt?.seconds ? new Date(msg.createdAt.seconds * 1000).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Just now"}
                                         </div>
                                     </div>
                                 </div>
