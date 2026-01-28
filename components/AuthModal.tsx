@@ -36,6 +36,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModal
             if (isLogin) {
                 await signInWithEmailAndPassword(auth, email, password);
             } else {
+                if (!name.trim()) {
+                    setError("Please enter your full name.");
+                    setLoading(false);
+                    return;
+                }
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 

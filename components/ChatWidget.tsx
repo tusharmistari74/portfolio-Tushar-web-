@@ -167,7 +167,7 @@ export default function ChatWidget() {
                                     <div className="flex items-center gap-1">
                                         <span className={`w-2 h-2 rounded-full ${user ? 'bg-green-500' : 'bg-gray-500'}`}></span>
                                         <p className="text-xs text-gray-400">
-                                            {user ? (user.displayName || "User") : "Guest"}
+                                            {user ? (user.displayName || user.email?.split('@')[0] || "User") : "Guest"}
                                         </p>
                                     </div>
                                 </div>
@@ -225,8 +225,8 @@ export default function ChatWidget() {
                                         >
                                             <div
                                                 className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.sender === "user"
-                                                        ? "bg-blue-600 text-white rounded-br-none"
-                                                        : "bg-white/10 text-gray-200 rounded-bl-none"
+                                                    ? "bg-blue-600 text-white rounded-br-none"
+                                                    : "bg-white/10 text-gray-200 rounded-bl-none"
                                                     }`}
                                             >
                                                 {msg.text}
