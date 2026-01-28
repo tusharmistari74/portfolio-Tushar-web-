@@ -1,6 +1,8 @@
 'use client';
 
+// Services Page - Moved to (website) group
 import { motion } from 'framer-motion';
+import { FaCode, FaMobile, FaServer, FaDatabase, FaLayerGroup, FaShieldAlt } from 'react-icons/fa';
 
 const services = [
     {

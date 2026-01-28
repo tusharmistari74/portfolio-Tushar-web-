@@ -1,3 +1,5 @@
+// Resume Page - Moved to (website) group
+import React from 'react';
 import Resume from "@/components/Resume";
 
 export default function ResumePage() {
