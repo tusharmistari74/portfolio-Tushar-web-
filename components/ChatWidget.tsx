@@ -143,8 +143,55 @@ export default function ChatWidget() {
         const text = input;
         setInput("");
         setStatus("sending");
-        // ... rest of send logic
 
+        try {
+            // 1. Add message to subcollection
+            await addDoc(collection(db, "chats", sessionId, "messages"), {
+                text,
+                sender: "user",
+                createdAt: serverTimestamp(),
+                read: false
+            });
+
+            // 2. Update summary doc
+            await setDoc(doc(db, "active_chats", sessionId), {
+                sessionId,
+                lastMessage: text,
+                lastUpdated: serverTimestamp(),
+                unread: true,
+                userName: user.displayName || "Anonymous",
+                userEmail: user.email,
+                userTyping: false
+            }, { merge: true });
+
+            setStatus("idle");
+
+            // 3. Check for Auto-Reply
+            const configDoc = await getDoc(doc(db, "config", "chat"));
+            if (configDoc.exists()) {
+                const config = configDoc.data();
+                if (!config.isOnline) {
+                    setTimeout(async () => {
+                        await addDoc(collection(db, "chats", sessionId, "messages"), {
+                            text: config.autoReplyMessage || "I'm currently offline and will reply soon.",
+                            sender: "admin",
+                            createdAt: serverTimestamp(),
+                            read: false
+                        });
+                        await setDoc(doc(db, "active_chats", sessionId), {
+                            lastMessage: "Auto-Reply: " + (config.autoReplyMessage?.slice(0, 20) || "Offline check"),
+                            unread: false
+                        }, { merge: true });
+                    }, 1000);
+                }
+            }
+
+        } catch (error: any) {
+            console.error("Error sending message:", error);
+            setStatus("error");
+            alert("Failed to send: " + (error?.message || error));
+            setInput(text);
+        }
     };
 
     return (
