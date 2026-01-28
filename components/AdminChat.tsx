@@ -23,6 +23,7 @@ interface ChatSession {
     unread: boolean;
     userName?: string;
     userEmail?: string;
+    userTyping?: boolean;
 }
 
 interface Message {
@@ -249,7 +250,9 @@ export default function AdminChat() {
                                     )}
                                 </div>
                                 {chat.userEmail && <p className="text-xs text-gray-500 mb-1">{chat.userEmail}</p>}
-                                <p className="text-sm text-gray-400 truncate pr-6">{chat.lastMessage}</p>
+                                <p className={`text-sm truncate pr-6 ${chat.userTyping ? "text-green-400 italic" : "text-gray-400"}`}>
+                                    {chat.userTyping ? "Typing..." : chat.lastMessage}
+                                </p>
 
                                 {/* Delete Button - Only visible on hover */}
                                 <button
