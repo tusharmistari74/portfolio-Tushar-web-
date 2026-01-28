@@ -125,9 +125,9 @@ export default function AdminChat() {
         setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, email, password);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert("Login failed. Check console.");
+            alert(`Login failed: ${error.code || error.message}`);
         } finally {
             setLoading(false);
         }
@@ -285,11 +285,15 @@ export default function AdminChat() {
                                 >
                                     <div
                                         className={`max-w-[70%] p-3 rounded-2xl text-sm ${msg.sender === "admin"
-                                                ? "bg-purple-600 text-white rounded-br-none"
-                                                : "bg-white/10 text-gray-200 rounded-bl-none"
+                                            ? "bg-purple-600 text-white rounded-br-none"
+                                            : "bg-white/10 text-gray-200 rounded-bl-none"
                                             }`}
                                     >
                                         {msg.text}
+                                        <div className={`text-[10px] mt-1 ${msg.sender === "admin" ? "text-purple-200" : "text-gray-400"
+                                            }`}>
+                                            {msg.createdAt?.seconds ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

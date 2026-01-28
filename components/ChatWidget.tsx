@@ -230,6 +230,10 @@ export default function ChatWidget() {
                                                     }`}
                                             >
                                                 {msg.text}
+                                                <div className={`text-[10px] mt-1 ${msg.sender === "user" ? "text-blue-200" : "text-gray-400"
+                                                    }`}>
+                                                    {msg.createdAt?.seconds ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
